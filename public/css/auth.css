@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+
+:root {
+    --bg-app: #020617;
+    /* Deep Slate */
+    --card-bg: #0f172a;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --primary: #10b981;
+    /* Professional Emerald */
+    --primary-muted: rgba(16, 185, 129, 0.1);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --error: #ef4444;
+}
+
+body.auth-page {
+    background-color: var(--bg-app);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    /* To allow navbar and footer to stack */
+    min-height: 100vh;
+    margin: 0;
+    color: var(--text-main);
+}
+
+/* Background Softness */
+.bg-orbs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% -20%, #1e293b 0%, transparent 70%);
+    z-index: -1;
+}
+
+/* Container Refinement */
+.container {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    margin: auto;
+    /* Centers the card in the flex body */
+}
+
+/* Back Button styling */
+.back-btn {
+    position: absolute;
+    top: 80px;
+    /* Below navbar */
+    left: 2rem;
+    width: auto !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.85rem !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-muted) !important;
+}
+
+.back-btn:hover {
+    color: var(--text-main) !important;
+    border-color: var(--text-muted) !important;
+}
+
+/* Typography & Titles */
+h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: var(--text-main);
+}
+
+.gradient-text {
+    color: var(--primary);
+}
+
+/* Professional Inputs */
+.input-group {
+    margin-bottom: 1.25rem;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.input-group input {
+    width: 100%;
+    background: #020617;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: white;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.input-group input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-muted);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn:not(.btn-secondary) {
+    background: var(--primary);
+    color: #020617;
+}
+
+.btn:hover:not(.btn-secondary) {
+    background: #34d399;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--text-muted);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.status-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--error);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}

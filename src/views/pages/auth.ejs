@@ -1,36 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <%- include('../partials/head') %>
+        <link rel="stylesheet" href="/css/auth.css">
 </head>
-<body>
+
+<body class="auth-page">
     <%- include('../partials/navbar') %>
-    <button class="btn btn-secondary back-btn" onclick="window.location.href='/'">← Home</button>
-    <div class="bg-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-    </div>
 
-    <div class="container" style="max-width: 400px; margin-top: 10vh;">
-        <h2 style="text-align: center; margin-bottom: 2rem;">Vault <span class="gradient-text">Authentication</span></h2>
-        
-        <div id="auth-error" class="status-badge status-danger" style="display: none; box-shadow: none;"></div>
+        <div class="bg-orbs"></div>
 
-        <div class="panel">
-            <div class="input-group">
-                <label>Account Identity</label>
-                <input type="text" id="auth-username" placeholder="Enter username">
-            </div>
-            <div class="input-group">
-                <label>Passphrase</label>
-                <input type="password" id="auth-password" placeholder="Enter passphrase">
-            </div>
-            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
-                <button class="btn" id="btn-login" style="flex: 1;">Login</button>
-                <button class="btn btn-secondary" id="btn-signup" style="flex: 1;">Create Node</button>
+        <button class="btn btn-secondary back-btn" onclick="window.location.href='/'">← Home</button>
+
+        <div class="container" style="max-width: 400px; margin-top: 10vh;">
+            <h2 style="text-align: center; margin-bottom: 2rem;">Vault <span class="gradient-text">Authentication</span>
+            </h2>
+
+            <div id="auth-error" class="status-badge status-danger" style="display: none;"></div>
+
+            <div class="panel">
+                <div class="input-group">
+                    <label>Account Identity</label>
+                    <input type="text" id="auth-username" placeholder="Enter username" autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label>Passphrase</label>
+                    <input type="password" id="auth-password" placeholder="Enter passphrase">
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                    <button class="btn" id="btn-login" style="flex: 1;">Login</button>
+                    <button class="btn btn-secondary" id="btn-signup" style="flex: 1;">Create Node</button>
+                </div>
             </div>
         </div>
-    </div>
-    <%- include('../partials/footer') %>
+
+        <%- include('../partials/footer') %>
 </body>
+
 </html>

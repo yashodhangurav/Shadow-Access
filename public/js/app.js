@@ -461,35 +461,40 @@ async function simulateMouseAttack() {
 
 /* Helper UI Logic */
 function updateRiskUI({ kbScore, mouseScore, pathStatus }) {
-    const kbText = document.getElementById('kb-score');
-    const mouseText = document.getElementById('mouse-score');
-    const pathText = document.getElementById('path-score');
-    const riskBar = document.getElementById('risk-bar');
-    if (!riskBar) return;
+    const kbText = document.getElementById('live-zscore');
+    const mouseText = document.getElementById('mouse-zscore');
+    const riskBar = document.getElementById('trust-bar'); // From vault.ejs
     
     let totalRisk = 0; 
 
     if (kbScore !== undefined && kbText) {
-        if (kbScore < 1.0) { kbText.innerText = "Secure"; kbText.className = "risk-value ok"; totalRisk += 5; }
-        else if (kbScore < 3.0) { kbText.innerText = "Erratic"; kbText.className = "risk-value warning"; totalRisk += 30; }
-        else { kbText.innerText = "Bot-like"; kbText.className = "risk-value danger"; totalRisk += 80; }
+        kbText.innerText = kbScore.toFixed(2);
+        if (kbScore < 1.0) { totalRisk += 5; }
+        else if (kbScore < 3.0) { totalRisk += 35; }
+        else { totalRisk += 80; }
     }
 
     if (mouseScore !== undefined && mouseText) {
-        if (mouseScore >= 2.0) { mouseText.innerText = "Natural"; mouseText.className = "risk-value ok"; totalRisk += 5; }
-        else if (mouseScore >= 0.5) { mouseText.innerText = "Suspicious"; mouseText.className = "risk-value warning"; totalRisk += 30; }
-        else { mouseText.innerText = "Linear"; mouseText.className = "risk-value danger"; totalRisk += 80; }
+        mouseText.innerText = mouseScore.toFixed(2);
+        if (mouseScore >= 2.0) { totalRisk += 5; }
+        else if (mouseScore >= 0.5) { totalRisk += 35; }
+        else { totalRisk += 80; }
     }
 
-    if (pathStatus && pathText) {
-        pathText.innerText = pathStatus.text;
-        pathText.className = `risk-value ${pathStatus.class}`;
-        if (pathStatus.class === 'danger') totalRisk += 100;
-        else if (pathStatus.class === 'warning') totalRisk += 50;
+    // Convert totalRisk structure into Trust Bar fill layout percentage
+    // 100% full is PERFECT trust, drops as risk rises.
+    if (riskBar) {
+        let trustPct = 100 - totalRisk;
+        trustPct = Math.max(5, Math.min(100, trustPct));
+        riskBar.style.width = trustPct + "%";
+        
+        const trustLabel = document.getElementById('trust-label');
+        if (trustLabel) {
+            if (trustPct > 80) trustLabel.innerText = "Continuous Auth: Verified";
+            else if (trustPct > 40) trustLabel.innerText = "Continuous Auth: Warning";
+            else trustLabel.innerText = "Continuous Auth: High Risk";
+        }
     }
-
-    totalRisk = Math.min(Math.max(totalRisk, 5), 100);
-    riskBar.style.width = totalRisk + "%";
 }
 
 async function confirmTransfer() {

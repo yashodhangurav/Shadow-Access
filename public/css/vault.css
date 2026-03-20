@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+    --bg: #f5f7fa;
+    --panel: #ffffff;
+    --border: #e0e0e0;
+    --primary: #2563eb;
+    --success: #16a34a;
+    --danger: #dc2626;
+    --text-main: #111827;
+    --text-muted: #6b7280;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+/* Container */
+.container {
+    padding: 2rem;
+}
+
+/* Panels */
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+/* Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+/* Headings */
+h2,
+h3,
+h4 {
+    margin: 0;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #111;
+}
+
+.btn-danger {
+    background: var(--danger);
+}
+
+/* Input */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+input {
+    padding: 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 0.95rem;
+}
+
+/* Balance Card */
+.balance-card {
+    background: #eef2ff;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Metrics */
+.metric-card {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-title {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.metric-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Status */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+}
+
+.status-secure {
+    background: #dcfce7;
+    color: var(--success);
+}
+
+/* Progress bar */
+.progress-bar {
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary);
+}
+
+/* Freeze overlay */
+#freeze-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* Remove heavy visuals */
+.bg-orbs,
+.orb {
+    display: none;
+}

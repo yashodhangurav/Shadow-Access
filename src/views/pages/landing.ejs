@@ -1,36 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <%- include('../partials/head') %>
+        <link rel="stylesheet" href="/css/landing.css">
 </head>
+
 <body>
     <%- include('../partials/navbar') %>
-    <div class="bg-orbs">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
-    </div>
 
-    <div class="container hero">
-        <h1>Welcome to <span class="gradient-text">Aegis Vault</span></h1>
-        <p>A next-generation Zero-Trust Crypto & Fiat Wallet that abandons passwords for Continuous Behavioral Biometrics. We monitor your unique digital rhythm—from keystroke flight times to granular mouse telemetry—ensuring that if your session is ever hijacked, the system locks out the attacker instantly.</p>
-        
-        <button class="btn" style="margin-top: 2rem;" onclick="window.location.href='/auth'">Access the Vault</button>
+        <div class="bg-orbs" style="background: radial-gradient(circle at 50% 0%, #0f172a 0%, #020617 100%);">
+            <div class="orb orb-1"
+                style="background: radial-gradient(circle, rgba(34, 211, 238, 0.05) 0%, transparent 70%);"></div>
+        </div>
 
-        <div class="features">
-            <div class="feature-card">
-                <h3>⌨️ Keystroke Dynamics</h3>
-                <p>Analyzes your unqiue typing rhythm (flight/dwell times). Bots type perfectly, you don't.</p>
+        <div class="container hero">
+            <div class="security-status-bar">
+                <span class="pulse-dot"
+                    style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+                SYSTEMS ONLINE: NEURAL BEHAVIORAL MONITORING V2.4
             </div>
-            <div class="feature-card">
-                <h3>🖱️ Mouse Linearity Checks</h3>
-                <p>Calculates the human curve of your mouse paths. Perfect robotic paths are instantly banned.</p>
-            </div>
-            <div class="feature-card">
-                <h3>🕵️ API Theft Detection</h3>
-                <p>Using a headless browser via Postman? Our route sequencing tracks logic jumps and destroys your session.</p>
+
+            <h1>Secure Your <br> <span class="gradient-text">Digital Sovereignty</span></h1>
+
+            <p>Aegis Vault is the first Zero-Trust gateway to abandon static credentials for <strong>Continuous
+                    Behavioral Authentication</strong>. By mapping your biometric interaction rhythm, we ensure that
+                your assets remain yours, even if your keys are stolen.</p>
+
+            <button class="btn" onclick="window.location.href='/auth'">Initialize Vault Access</button>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h3>Temporal Profiling</h3>
+                    <p>Advanced Keystroke Dynamics analyze the flight and dwell times of your digital pulse. Our engine
+                        detects script-based injection in under 50ms.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Spatial Telemetry</h3>
+                    <p>Human mouse movement is inherently curved. By detecting robotic linearity and instant cursor
+                        "warps," we nullify 99% of remote hijack attempts.</p>
+                </div>
+
+                <div class="feature-card">
+                    <h3>Route Integrity</h3>
+                    <p>Continuous monitoring of session logic. If an API request bypasses the expected behavioral
+                        sequence, the session is purged from memory instantly.</p>
+                </div>
             </div>
         </div>
-    </div>
-    <%- include('../partials/footer') %>
+
+        <%- include('../partials/footer') %>
 </body>
+
 </html>

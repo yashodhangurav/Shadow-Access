@@ -1,0 +1,22 @@
+/* public/css/enroll.css - Device Calibration Specifics */
+
+.enroll-container {
+    max-width: 600px;
+    margin-top: 10vh;
+}
+
+#enroll-input {
+    height: 140px;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    background: rgba(0,0,0,0.3);
+    border-color: rgba(255,255,255,0.05);
+}
+
+.calibration-box {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(0, 229, 255, 0.03);
+    border: 1px solid rgba(0, 229, 255, 0.1);
+    border-radius: 12px;
+}
