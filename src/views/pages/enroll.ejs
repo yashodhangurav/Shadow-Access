@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+    <button class="btn btn-secondary back-btn" onclick="window.location.href='/auth'">← Back to Login</button>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2" style="background:var(--accent);"></div>
+    </div>
+
+    <div class="container" style="max-width: 600px; margin-top: 10vh;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Device <span class="gradient-text">Calibration</span></h2>
+            <button class="btn btn-secondary" id="btn-logout">Abort</button>
+        </div>
+        
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">
+            Before accessing Aegis Vault, you must calibrate your behavioral signature. Type the phrase below at your natural speed. This establishes your baseline flight & dwell timing.
+        </p>
+
+        <div class="panel">
+            <div class="status-badge" style="margin-bottom: 1rem; border: none; box-shadow: none;">
+                <strong>Calibration Phrase:</strong><br><br>
+                <span style="font-size: 1.1rem; letter-spacing: 1px; color:#fff;">I confirm my identity to authorize secure vault access today.</span>
+            </div>
+            <textarea id="enroll-input" rows="4" placeholder="Start typing the phrase above..."></textarea>
+            <div style="text-align: right; margin-top: 1rem;">
+                <button class="btn" id="btn-enroll">Calibrate & Access Vault</button>
+            </div>
+        </div>
+    </div>
+    <%- include('../partials/footer') %>
+</body>
+</html>

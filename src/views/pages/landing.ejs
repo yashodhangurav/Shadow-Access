@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="container hero">
+        <h1>Welcome to <span class="gradient-text">Aegis Vault</span></h1>
+        <p>A next-generation Zero-Trust Crypto & Fiat Wallet that abandons passwords for Continuous Behavioral Biometrics. We monitor your unique digital rhythm—from keystroke flight times to granular mouse telemetry—ensuring that if your session is ever hijacked, the system locks out the attacker instantly.</p>
+        
+        <button class="btn" style="margin-top: 2rem;" onclick="window.location.href='/auth'">Access the Vault</button>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>⌨️ Keystroke Dynamics</h3>
+                <p>Analyzes your unqiue typing rhythm (flight/dwell times). Bots type perfectly, you don't.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🖱️ Mouse Linearity Checks</h3>
+                <p>Calculates the human curve of your mouse paths. Perfect robotic paths are instantly banned.</p>
+            </div>
+            <div class="feature-card">
+                <h3>🕵️ API Theft Detection</h3>
+                <p>Using a headless browser via Postman? Our route sequencing tracks logic jumps and destroys your session.</p>
+            </div>
+        </div>
+    </div>
+    <%- include('../partials/footer') %>
+</body>
+</html>

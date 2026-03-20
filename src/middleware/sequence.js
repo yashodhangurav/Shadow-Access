@@ -1,29 +1,25 @@
 // src/middleware/sequence.js
 
-const userPaths = {};
-
 const checkSequence = (req, res, next) => {
-    const sessionId = req.sessionID || "guest";
     const currentPath = req.path;
 
     // Only track API requests to analyze behavior sequences
     if (!currentPath.startsWith('/api')) return next();
 
-    if (!userPaths[sessionId]) userPaths[sessionId] = [];
+    // Attach sequence directly to robust database session object instead of RAM
+    if (!req.session.apiSequence) req.session.apiSequence = [];
 
-    userPaths[sessionId].push(currentPath);
+    req.session.apiSequence.push(currentPath);
+    
     // Keep a rolling window of the last 4 endpoints
-    if (userPaths[sessionId].length > 4) userPaths[sessionId].shift();
+    if (req.session.apiSequence.length > 4) req.session.apiSequence.shift();
 
-    const sequence = userPaths[sessionId].join(' -> ');
+    const sequence = req.session.apiSequence.join(' -> ');
 
-    // Known risky or impossible sequences indicative of bot scraping
+    // Known generic risky sequences (bypassing normal app flow)
     const riskySequences = [
         "/api/login -> /api/export-data",
-        "/api/me -> /api/export-data",
-        "/api/analyze-behavior -> /api/export-data",
-        "/api/analyze-mouse -> /api/export-data",
-        "/api/export-data -> /api/export-data" // Spamming sensitive route
+        "/api/me -> /api/export-data"
     ];
 
     let isRisky = false;
@@ -32,9 +28,19 @@ const checkSequence = (req, res, next) => {
     });
 
     // Catch isolated jumps: If they take a valid session cookie from their browser into Postman, 
-    // but they hit /export-data as their very first request, the sequence length is only 1.
-    if (userPaths[sessionId].length === 1 && currentPath === '/api/export-data') {
+    // but they hit /transfer-funds as their very first request, the sequence length is only 1.
+    if (req.session.apiSequence.length === 1 && currentPath === '/api/transfer-funds') {
         isRisky = true;
+    }
+
+    // Strict Workflow Enforcement for High-Risk Routes
+    if (currentPath === '/api/transfer-funds' && req.session.apiSequence.length > 1) {
+        // A real human transfer must be immediately preceded by bio-telemetry processing
+        const prevPath = req.session.apiSequence[req.session.apiSequence.length - 2];
+        if (prevPath !== '/api/analyze-behavior' && prevPath !== '/api/analyze-mouse') {
+            isRisky = true;
+            console.log(`❌ Strict Workflow Violated: /api/transfer-funds was preceded by ${prevPath}`);
+        }
     }
 
     if (isRisky) {
@@ -44,8 +50,9 @@ const checkSequence = (req, res, next) => {
         if (req.user) {
             const User = require('../models/User'); // inline require
             User.findByIdAndUpdate(req.user._id, { isFlagged: true }).exec();
-            if (req.logout) req.logout(() => {}); 
         }
+        
+        req.session.destroy(); // Blow up the database session
 
         return res.status(403).json({ 
             status: "ANOMALY_DETECTED", 

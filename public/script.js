@@ -10,6 +10,7 @@ const overlay = document.getElementById('freeze-overlay');
 
 let keystrokeBuffer = [];
 let lastKeyTime = 0;
+let keyPressTimes = {};
 
 // View Navigation
 function showView(viewName) {
@@ -100,17 +101,35 @@ async function logout() {
 }
 
 // Keystroke Timing Core
+const captureKeyDown = (e) => {
+    if (!keyPressTimes[e.code]) {
+        keyPressTimes[e.code] = performance.now();
+    }
+};
+
 const captureTiming = (e) => {
     const now = performance.now();
+    const pressTime = keyPressTimes[e.code];
+    let dwellTime = 0;
+    
+    if (pressTime) {
+        dwellTime = now - pressTime;
+        delete keyPressTimes[e.code];
+    }
+
     if (lastKeyTime > 0) {
         const flightTime = now - lastKeyTime;
-        if (flightTime < 2000) keystrokeBuffer.push({ flightTime });
+        if (flightTime < 5000) keystrokeBuffer.push({ flightTime, dwellTime });
     }
     lastKeyTime = now;
 };
 
 // Enrollment
-document.getElementById('enroll-input')?.addEventListener('keyup', captureTiming);
+const enrollInput = document.getElementById('enroll-input');
+if (enrollInput) {
+    enrollInput.addEventListener('keydown', captureKeyDown);
+    enrollInput.addEventListener('keyup', captureTiming);
+}
 
 async function enrollUser() {
     const res = await fetch('/api/enroll', {
@@ -136,8 +155,9 @@ const cText = document.getElementById('score-text');
 const badge = document.getElementById('status-badge');
 
 if (testInput) {
-    testInput.addEventListener('keyup', async () => {
-        captureTiming();
+    testInput.addEventListener('keydown', captureKeyDown);
+    testInput.addEventListener('keyup', async (e) => {
+        captureTiming(e);
         
         if (keystrokeBuffer.length >= 5) {
             const batch = [...keystrokeBuffer];
@@ -214,7 +234,7 @@ async function simulateAttack() {
     // Zero variance typing
     for (let i = 0; i < 15; i++) {
         await new Promise(r => setTimeout(r, 60));
-        attackBuffer.push({ flightTime: 60 });
+        attackBuffer.push({ flightTime: 60, dwellTime: 50 });
         testInput.value += "x"; 
     }
 

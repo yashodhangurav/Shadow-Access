@@ -9,12 +9,22 @@ exports.enroll = async (req, res) => {
         }
 
         const n = pattern.length;
-        const mean = pattern.reduce((acc, curr) => acc + curr.flightTime, 0) / n;
-        const variance = pattern.reduce((acc, curr) => acc + Math.pow(curr.flightTime - mean, 2), 0) / n;
-        const stdDev = Math.sqrt(variance);
+        const meanFlight = pattern.reduce((acc, curr) => acc + curr.flightTime, 0) / n;
+        const varianceFlight = pattern.reduce((acc, curr) => acc + Math.pow(curr.flightTime - meanFlight, 2), 0) / n;
+        const stdDevFlight = Math.sqrt(varianceFlight);
+
+        const meanDwell = pattern.reduce((acc, curr) => acc + (curr.dwellTime || 0), 0) / n;
+        const varianceDwell = pattern.reduce((acc, curr) => acc + Math.pow((curr.dwellTime || 0) - meanDwell, 2), 0) / n;
+        const stdDevDwell = Math.sqrt(varianceDwell);
 
         const updated = await User.findByIdAndUpdate(req.user._id, {
-            behaviorProfile: { avgFlightTime: mean, stdDeviation: stdDev, sampleCount: n }
+            behaviorProfile: { 
+                avgFlightTime: meanFlight, 
+                stdDeviation: stdDevFlight, 
+                avgDwellTime: meanDwell,
+                stdDevDwell: stdDevDwell,
+                sampleCount: n 
+            }
         }, { new: true });
 
         res.json({ message: "Profile Created!", userId: updated._id });
@@ -37,8 +47,25 @@ exports.analyzeKeyboard = async (req, res) => {
         }
 
         const profile = user.behaviorProfile;
-        const currentAvg = pattern.reduce((acc, curr) => acc + curr.flightTime, 0) / pattern.length;
-        const anomalyScore = calculateAnomalyScore(currentAvg, profile.avgFlightTime, profile.stdDeviation);
+        
+        const currentAvgFlight = pattern.reduce((acc, curr) => acc + curr.flightTime, 0) / pattern.length;
+        const anomalyScoreFlight = calculateAnomalyScore(currentAvgFlight, profile.avgFlightTime, profile.stdDeviation);
+        
+        const currentAvgDwell = pattern.reduce((acc, curr) => acc + (curr.dwellTime || 0), 0) / pattern.length;
+        const anomalyScoreDwell = calculateAnomalyScore(currentAvgDwell, profile.avgDwellTime, profile.stdDevDwell || 0);
+        
+        // Use Math.max so an extreme anomaly in *either* metric triggers the alarm
+        let anomalyScore = Math.max(anomalyScoreFlight, anomalyScoreDwell);
+        
+        // --- ROBOTIC PRECISION CHECK ---
+        // Calculate the variance of the *current* batch of keystrokes.
+        // Humans cannot type 5+ keys with exact millisecond precision.
+        const currentVarFlight = pattern.reduce((acc, curr) => acc + Math.pow(curr.flightTime - currentAvgFlight, 2), 0) / pattern.length;
+        if (currentVarFlight < 2.0 && pattern.length >= 5) {
+            // Force a massive anomaly score because of mechanical precision (Bot Detection)
+            anomalyScore = Math.max(anomalyScore, 10.0);
+        }
+
         const THRESHOLD = 3.0;
 
         if (anomalyScore > THRESHOLD) {

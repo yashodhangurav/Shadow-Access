@@ -3,8 +3,8 @@ const router = express.Router();
 const { isAuthenticated } = require('../middleware/authMiddleware');
 
 // Sensitive Route Demo
-router.post('/export-data', isAuthenticated, (req, res) => {
-    res.json({ message: "Sensitive Data exported successfully" });
+router.post('/transfer-funds', isAuthenticated, (req, res) => {
+    res.json({ message: "Transfer of funds cryptographically signed and executed." });
 });
 
 module.exports = router;

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head') %>
+</head>
+<body>
+    <%- include('../partials/navbar') %>
+    <div class="bg-orbs" style="opacity: 0.5;">
+        <div class="orb orb-1" style="background:#00E5FF; width:600px; height:600px; top:-200px; left:-200px;"></div>
+    </div>
+
+    <!-- Freezing Cover -->
+    <div id="freeze-overlay">
+        <h2>🚨 CRITICAL SECURITY ALERT 🚨</h2>
+        <p id="freeze-reason">Aegis Vault has locked this session due to abnormal behavioral biometrics.</p>
+        <p>Robotic/Unauthorized Transfer Blocked.</p>
+        <button class="btn btn-secondary" style="max-width: 300px; margin-top: 2rem;" onclick="resetDemo()">Unlock & Reset Demo</button>
+    </div>
+    
+    <div class="container" style="max-width: 1200px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h2 style="margin: 0;">Aegis <span class="gradient-text">Wallet</span></h2>
+                <div id="dashboard-user" style="color: var(--text-muted); font-family: 'JetBrains Mono'; margin-top: 5px;">Authenticating...</div>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="btn btn-secondary" id="btn-reset-demo" style="border-color: #00E5FF; color: #00E5FF;">Reset Security Metrics</button>
+                <button class="btn btn-danger" id="btn-logout">Logout</button>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            
+            <!-- Full Width Chart Panel -->
+            <div class="panel full-width">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="color:var(--text-muted);">ShadowAccess Live Bio-Telemetry</h3>
+                    <span class="status-badge status-secure" id="chart-status" style="border:none; box-shadow:none;">● Live Logging</span>
+                </div>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="biometricChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Left Panel: Sandbox turned into Transfer Portal -->
+            <div class="panel">
+                <div style="margin-bottom: 2rem; padding: 1.5rem; background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 8px;">
+                    <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Available Balance</p>
+                    <h2 style="margin: 0.5rem 0 0 0; color: #00E5FF; font-family: 'JetBrains Mono';">$142,500.00 <span style="font-size: 1rem; color: #888;">USD</span></h2>
+                </div>
+
+                <h3 style="margin-bottom: 1rem;">Transfer Funds</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+                    Type the recipient wallet address. ShadowAccess naturally profiles your rhythm to ensure it is YOU making the transfer, not a hijacked script.
+                </p>
+                
+                <div class="input-group" style="margin-bottom: 1rem;">
+                    <label>Amount (USD)</label>
+                    <input type="text" value="$5,000.00" disabled style="opacity: 0.6;">
+                </div>
+                <div class="input-group">
+                    <label>Recipient Address</label>
+                    <input type="text" id="test-input" placeholder="Enter recipient wallet address..." autocomplete="off">
+                </div>
+                
+                <button class="btn" style="width: 100%; margin-top: 1rem;" onclick="confirmTransfer()">Confirm Transfer</button>
+
+                <!-- Hacker Simulation Area -->
+                <div style="margin-top: 3rem; border-top: 1px solid var(--glass-border); padding-top: 1.5rem;">
+                    <h4 style="color: var(--red-alert); margin-bottom: 1rem;">Simulate Attack (For Judges)</h4>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Inject robotic payload attempting to steal funds.</p>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" id="btn-attack" style="font-size: 0.8rem; padding: 0.5rem 1rem; border-color: var(--red-alert); color: #fff;">🤖 Auto-Type Bot</button>
+                        <button class="btn btn-secondary" id="btn-mouse-attack" style="font-size: 0.8rem; padding: 0.5rem 1rem; border-color: var(--red-alert); color: #fff;">🖱️ Mouse Script Bot</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Live Security Analysis -->
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="margin: 0;">Security Analysis</h3>
+                    <span style="font-size: 1.5rem;">🛡️</span>
+                </div>
+                
+                <div class="metric-card">
+                    <div class="metric-title">Keystroke Threat Level</div>
+                    <div class="metric-value"><span id="live-zscore" class="gradient-text">0.00</span></div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Deviation from baseline. >3 triggers lockout.</p>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-title">Mouse Biometrics</div>
+                    <div class="metric-value"><span id="mouse-zscore" class="gradient-text" style="color: #00E5FF;">0.00</span></div>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">Linearity deviation. Under 5.0 indicates robotic paths.</p>
+                </div>
+
+                <h4 style="margin: 2rem 0 1rem 0; color:var(--text-muted);">Confidence Matrices</h4>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="trust-bar" style="width: 100%; background: linear-gradient(90deg, #00E5FF, #00B3FF);"></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:#888; margin-top:0.5rem;">
+                    <span>Low Trust</span>
+                    <span id="trust-label">Continuous Auth: Verified</span>
+                </div>
+                
+                <!-- System Status -->
+                <div id="system-status" class="status-badge status-secure" style="margin-top: 2rem;">
+                    SYSTEM SECURE
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
+</body>
+</html>
