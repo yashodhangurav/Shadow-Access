@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ShadowAccess | Next-Gen Security</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Fake Mouse Pointer for Demo -->
+    <img id="demo-pointer" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M7 2l12 11.2-5.8.5 3.3 7.3-2.2 1-3.2-7.4-4.4 4.8z' fill='white' stroke='black' stroke-width='1'/></svg>" style="display: none; position: fixed; top: 10px; left: 10px; z-index: 9998; pointer-events: none;">
+
+    <!-- Overlay for detected attacks -->
+    <div id="freeze-overlay">
+        <h1>🚨 THREAT DETECTED 🚨</h1>
+        <p id="freeze-reason" style="font-size: 1.2rem; color: #fff; margin-bottom: 2rem;">Your session has been locked due to behavioral anomalies.</p>
+        <button class="btn btn-secondary" onclick="resetDemo()" style="max-width:300px;">Return to Authentication</button>
+    </div>
+
+    <!-- View: Auth (Login/Signup) -->
+    <div id="view-auth" class="container view active">
+        <h1>ShadowAccess</h1>
+        <p class="subtitle">Next-Generation Behavioral Biometrics</p>
+        
+        <input type="text" id="auth-username" placeholder="Username">
+        <input type="password" id="auth-password" placeholder="Password">
+        
+        <button class="btn" style="margin-bottom: 0.5rem;" onclick="login()">Secure Login</button>
+        <button class="btn btn-secondary" onclick="signup()">Create Identity</button>
+
+        <p id="auth-error" style="color:var(--red-alert); margin-top:1rem; text-align:center; display:none; font-weight: bold;"></p>
+    </div>
+
+    <!-- View: Enroll -->
+    <div id="view-enroll" class="container view">
+        <h1>Profile Calibration</h1>
+        <p class="subtitle">Please type at least 50 characters to calibrate your baseline behavioral fingerprint.</p>
+        
+        <textarea id="enroll-input" placeholder="Type the quick brown fox jumps over the lazy dog..."></textarea>
+        
+        <button class="btn" style="margin-bottom: 0.5rem;" onclick="enrollUser()">Initialize Profile</button>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- View: Dashboard (Live Monitor) -->
+    <div id="view-dashboard" class="container view">
+        <div class="header-row">
+            <div>
+                <h2>Live Monitor</h2>
+                <p id="dashboard-user" style="color:#888; font-size: 0.9em;"></p>
+            </div>
+            <div style="display:flex; flex-direction: column; gap: 8px;">
+                <div id="status-badge" class="status-badge status-secure">
+                    <span id="badge-keyboard">⌨️ Keyboard: OK</span>
+                </div>
+                <div id="mouse-badge" class="status-badge status-secure">
+                    <span id="badge-mouse">🖱️ Mouse: Validating</span>
+                </div>
+            </div>
+        </div>
+
+        <p style="font-size: 0.9em; margin-bottom: 8px;">Continuous Trust Score</p>
+        <div class="confidence-wrapper">
+            <div id="confidence-bar"></div>
+        </div>
+        <p class="score-text" style="margin-bottom: 2rem;">Anomaly Z-Score: <span id="score-text">0.00</span> / 3.00</p>
+
+        <!-- Risk Dashboard Matrix -->
+        <div id="risk-dashboard" class="risk-dashboard">
+            <h4>Live Biometric Risk Matrix</h4>
+            <div class="risk-row">
+                <span class="risk-label">⌨️ Keystroke Variance:</span>
+                <span id="kb-score" class="risk-value ok">Stable</span>
+            </div>
+            <div class="risk-row">
+                <span class="risk-label">🖱️ Mouse Linearity:</span>
+                <span id="mouse-score" class="risk-value ok">Natural</span>
+            </div>
+            <div class="risk-row">
+                <span class="risk-label">🔗 API Path Logic:</span>
+                <span id="path-score" class="risk-value ok">Valid Flow</span>
+            </div>
+            <div class="risk-progress-bg">
+                <div id="risk-bar" class="risk-progress-fill"></div>
+            </div>
+        </div>
+
+        <textarea id="test-input" placeholder="Interact here. ShadowAccess is silently monitoring your typing rhythm..."></textarea>
+        
+        <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+            <button class="btn btn-danger" onclick="simulateAttack()" style="flex:1;">🚀 Keystroke Bot</button>
+            <button class="btn btn-danger" onclick="simulateMouseAttack()" style="flex:1;">🎯 Mouse Script</button>
+            <button class="btn btn-danger" onclick="simulateDataTheft()" style="flex:1; background:#8b0000;">💥 API Theft</button>
+        </div>
+        <button class="btn btn-secondary" onclick="logout()" style="margin-top: 10px;">Secure Logout</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
