@@ -5,38 +5,40 @@ let lastKeyTime = 0;
 let keyPressTimes = {};
 let mouseData = [];
 let lastMousePos = { x: 0, y: 0 };
+let lastMouseCaptureTime = 0; // Added for throttling
 let biometricChart;
 let chartLabels = [];
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const path = window.location.pathname;
 
     if (path === '/' || path === '/index.html') {
         checkSession(false, false);
-    } 
+    }
     else if (path.includes('/auth')) {
         document.getElementById('btn-login')?.addEventListener('click', login);
         document.getElementById('btn-signup')?.addEventListener('click', signup);
         checkSession(true, true);
-    } 
+    }
     else if (path.includes('/enroll')) {
         document.getElementById('btn-enroll')?.addEventListener('click', enrollUser);
         document.getElementById('btn-logout')?.addEventListener('click', logout);
-        
+
         const enrollInput = document.getElementById('enroll-input');
         if (enrollInput) {
             enrollInput.addEventListener('keydown', captureKeyDown);
             enrollInput.addEventListener('keyup', captureTiming);
         }
         checkSession(true, true);
-    } 
-    else if (path.includes('/dashboard')) {
+    }
+    else if (path.includes('/dashboard') || path.includes('/transfer-funds')) {
         document.getElementById('btn-attack')?.addEventListener('click', simulateAttack);
         document.getElementById('btn-mouse-attack')?.addEventListener('click', simulateMouseAttack);
         // The API attack is now executed via Hoppscotch/Postman manually
         document.getElementById('btn-logout')?.addEventListener('click', logout);
         document.getElementById('btn-reset-demo')?.addEventListener('click', resetDemo);
-        
+
         const testInput = document.getElementById('test-input');
         if (testInput) {
             testInput.addEventListener('keydown', captureKeyDown);
@@ -129,8 +131,19 @@ async function checkSession(redirectIfLoggedOut = true, redirectIfLoggedIn = fal
             if (data.profileExists) {
                 const dashUser = document.getElementById('dashboard-user');
                 if (dashUser) dashUser.innerText = `Identity Verified: ${data.user.username}`;
-                
-                if (redirectIfLoggedIn && !path.includes('/dashboard')) {
+
+                if (!window.threatSource && (path.includes('/dashboard') || path.includes('/transfer-funds'))) {
+                    window.threatSource = new EventSource('/api/stream');
+                    window.threatSource.onmessage = (event) => {
+                        const evtData = JSON.parse(event.data);
+                        if (evtData.action === 'FORCE_LOCKOUT') {
+                            updateRiskUI({ pathStatus: { text: "Impossible Sequence", class: "danger" } });
+                            triggerFreeze(`Malicious API Scraping Sequence Detected.\nSequence: ${evtData.sequence}`);
+                        }
+                    };
+                }
+
+                if (redirectIfLoggedIn && !path.includes('/dashboard') && !path.includes('/transfer-funds')) {
                     window.location.href = '/dashboard';
                 }
             } else {
@@ -154,13 +167,13 @@ async function login() {
     const u = document.getElementById('auth-username').value;
     const p = document.getElementById('auth-password').value;
     const errEl = document.getElementById('auth-error');
-    
+
     const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })
     });
-    
+
     if (res.ok) {
         errEl.style.display = 'none';
         window.location.href = '/enroll'; // Check session will handle correct routing
@@ -175,7 +188,7 @@ async function signup() {
     const u = document.getElementById('auth-username').value;
     const p = document.getElementById('auth-password').value;
     const errEl = document.getElementById('auth-error');
-    
+
     if (!u || !p) {
         errEl.innerText = "Please provide username and password.";
         errEl.style.display = 'block';
@@ -187,7 +200,7 @@ async function signup() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: u, password: p })
     });
-    
+
     if (res.ok) {
         errEl.style.display = 'none';
         window.location.href = '/enroll';
@@ -214,7 +227,7 @@ const captureTiming = (e) => {
     const now = performance.now();
     const pressTime = keyPressTimes[e.code];
     let dwellTime = 0;
-    
+
     if (pressTime) {
         dwellTime = now - pressTime;
         delete keyPressTimes[e.code];
@@ -224,13 +237,13 @@ const captureTiming = (e) => {
         const flightTime = now - lastKeyTime;
         if (flightTime < 5000) {
             keystrokeBuffer.push({ flightTime, dwellTime });
-            
+
             // Push to Chart.js
             if (biometricChart) {
                 chartLabels.push('');
                 biometricChart.data.datasets[0].data.push(flightTime);
                 biometricChart.data.datasets[1].data.push(dwellTime);
-                
+
                 if (chartLabels.length > 25) {
                     chartLabels.shift();
                     biometricChart.data.datasets[0].data.shift();
@@ -249,7 +262,7 @@ async function enrollUser() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pattern: keystrokeBuffer })
     });
-    
+
     if (res.ok) {
         keystrokeBuffer = [];
         lastKeyTime = 0;
@@ -262,10 +275,10 @@ async function enrollUser() {
 
 async function analyzeLiveTyping(e) {
     captureTiming(e);
-    
-    if (keystrokeBuffer.length >= 5) {
+
+    if (keystrokeBuffer.length >= 10) { // Increased batch size to 10 for better accuracy and fewer API calls
         const batch = [...keystrokeBuffer];
-        keystrokeBuffer = []; 
+        keystrokeBuffer = [];
 
         const res = await fetch('/api/analyze-behavior', {
             method: 'POST',
@@ -295,24 +308,24 @@ function updateUI(score) {
     const cText = document.getElementById('score-text');
     const cBar = document.getElementById('confidence-bar');
     const badge = document.getElementById('status-badge');
-    
-    if(cText) cText.innerText = score.toFixed(2);
-    
+
+    if (cText) cText.innerText = score.toFixed(2);
+
     let width = 100 - (score * 25);
     if (width < 0) width = 0;
-    if(cBar) cBar.style.width = width + "%";
+    if (cBar) cBar.style.width = width + "%";
 
     if (score < 1.0) {
-        if(cBar) cBar.style.background = "#00ff00";
-        if(badge) {
+        if (cBar) cBar.style.background = "#00ff00";
+        if (badge) {
             badge.className = "status-badge status-secure";
             badge.innerHTML = "⌨️ Keyboard: OK";
         }
     } else if (score < 3.0) {
-        if(cBar) cBar.style.background = "#ffa500";
+        if (cBar) cBar.style.background = "#ffa500";
     } else {
-        if(cBar) cBar.style.background = "var(--red-alert)";
-        if(badge) {
+        if (cBar) cBar.style.background = "var(--red-alert)";
+        if (badge) {
             badge.className = "status-badge status-danger";
             badge.innerHTML = "🚨 High Risk";
         }
@@ -323,11 +336,11 @@ function triggerFreeze(reason = "Your session has been locked due to behavioral 
     const overlay = document.getElementById('freeze-overlay');
     const p = document.getElementById('freeze-reason');
     if (p) p.innerText = reason;
-    if (overlay) overlay.classList.add('active'); 
-    
+    if (overlay) overlay.classList.add('active');
+
     const testInput = document.getElementById('test-input');
     if (testInput) {
-        testInput.blur(); 
+        testInput.blur();
         testInput.disabled = true;
     }
 }
@@ -335,19 +348,19 @@ function triggerFreeze(reason = "Your session has been locked due to behavioral 
 async function simulateAttack() {
     const testInput = document.getElementById('test-input');
     if (!testInput) return;
-    testInput.value = ""; 
+    testInput.value = "";
     let attackBuffer = [];
 
     // Zero variance typing
     for (let i = 0; i < 15; i++) {
         await new Promise(r => setTimeout(r, 60)); // dramatic visual pause
-        
+
         attackBuffer.push({ flightTime: 60, dwellTime: 50 });
-        testInput.value += "x"; 
+        testInput.value += "x";
 
         if (biometricChart) {
             chartLabels.push(''); // Graph the robotic injection linearly
-            biometricChart.data.datasets[0].data.push(60); 
+            biometricChart.data.datasets[0].data.push(60);
             biometricChart.data.datasets[1].data.push(50);
             if (chartLabels.length > 25) {
                 chartLabels.shift();
@@ -365,7 +378,7 @@ async function simulateAttack() {
     });
 
     const result = await res.json();
-    
+
     if (result.score !== undefined) updateUI(result.score);
 
     if (result.status === "ANOMALY_DETECTED") {
@@ -375,20 +388,24 @@ async function simulateAttack() {
 
 /* Mouse Logic */
 function captureMouseMovement(e) {
+    const now = Date.now();
+    if (now - lastMouseCaptureTime < 50) return; // Limit capture rate to ~20Hz
+    lastMouseCaptureTime = now;
+
     const currentPos = { x: e.clientX, y: e.clientY };
-    
+
     const distance = Math.sqrt(
-        Math.pow(currentPos.x - lastMousePos.x, 2) + 
+        Math.pow(currentPos.x - lastMousePos.x, 2) +
         Math.pow(currentPos.y - lastMousePos.y, 2)
     );
 
     if (distance > 5) {
-        mouseData.push({ x: currentPos.x, y: currentPos.y, timestamp: Date.now() });
+        mouseData.push({ x: currentPos.x, y: currentPos.y, timestamp: now });
     }
 
     lastMousePos = currentPos;
 
-    if (mouseData.length >= 50) {
+    if (mouseData.length >= 150) { // Increased buffer to reduce request count
         sendMouseData([...mouseData]);
         mouseData = [];
     }
@@ -397,7 +414,7 @@ function captureMouseMovement(e) {
 async function sendMouseData(data) {
     const mouseBadge = document.getElementById('mouse-badge');
     const badgeMouseTxt = document.getElementById('badge-mouse');
-    
+
     try {
         const res = await fetch('/api/analyze-mouse', {
             method: 'POST',
@@ -405,7 +422,7 @@ async function sendMouseData(data) {
             body: JSON.stringify({ points: data })
         });
         const result = await res.json();
-        
+
         if (res.status === 401 || res.status === 403) {
             triggerFreeze();
             return;
@@ -439,21 +456,21 @@ async function simulateMouseAttack() {
     }
 
     let attackBuffer = [];
-    
+
     // Animate the pointer visually in a perfect straight line
-    for(let i=0; i<60; i++) {
-        await new Promise(r => setTimeout(r, 20)); 
-        let newX = 10 + (i * 12); 
-        let newY = 10 + (i * 12); 
-        
+    for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 20));
+        let newX = 10 + (i * 12);
+        let newY = 10 + (i * 12);
+
         if (fakePointer) {
             fakePointer.style.left = newX + 'px';
             fakePointer.style.top = newY + 'px';
         }
-        
+
         attackBuffer.push({ x: newX, y: newY, timestamp: Date.now() });
     }
-    
+
     sendMouseData(attackBuffer);
 
     if (fakePointer) setTimeout(() => { fakePointer.style.display = 'none'; }, 800);
@@ -464,8 +481,8 @@ function updateRiskUI({ kbScore, mouseScore, pathStatus }) {
     const kbText = document.getElementById('live-zscore');
     const mouseText = document.getElementById('mouse-zscore');
     const riskBar = document.getElementById('trust-bar'); // From vault.ejs
-    
-    let totalRisk = 0; 
+
+    let totalRisk = 0;
 
     if (kbScore !== undefined && kbText) {
         kbText.innerText = kbScore.toFixed(2);
@@ -487,7 +504,7 @@ function updateRiskUI({ kbScore, mouseScore, pathStatus }) {
         let trustPct = 100 - totalRisk;
         trustPct = Math.max(5, Math.min(100, trustPct));
         riskBar.style.width = trustPct + "%";
-        
+
         const trustLabel = document.getElementById('trust-label');
         if (trustLabel) {
             if (trustPct > 80) trustLabel.innerText = "Continuous Auth: Verified";
@@ -499,11 +516,11 @@ function updateRiskUI({ kbScore, mouseScore, pathStatus }) {
 
 async function confirmTransfer() {
     // 1. Send final micro-batch of telemetry proving human interaction immediately prior to the transfer
-    const resBio = await fetch('/api/analyze-mouse', { 
-        method: 'POST', 
+    const resBio = await fetch('/api/analyze-mouse', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         // Sending a dummy safe linearity score natively since we just clicked the button
-        body: JSON.stringify({ points: [{x:0,y:0},{x:1,y:1},{x:2,y:2},{x:4,y:3},{x:6,y:5},{x:10,y:12},{x:15,y:14},{x:20,y:20},{x:22,y:25},{x:25,y:30}] }) 
+        body: JSON.stringify({ points: [{ x: 0, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 2 }, { x: 4, y: 3 }, { x: 6, y: 5 }, { x: 10, y: 12 }, { x: 15, y: 14 }, { x: 20, y: 20 }, { x: 22, y: 25 }, { x: 25, y: 30 }] })
     });
 
     if (!resBio.ok) return; // If blocked by earlier anomaly
@@ -511,7 +528,7 @@ async function confirmTransfer() {
     // 2. Safely call the secure route. We will pass Strict Workflow Enforcement because we just sent bio-telemetry.
     const res = await fetch('/api/transfer-funds', { method: 'POST' });
     const result = await res.json();
-    
+
     if (res.status === 403 && result.status === "ANOMALY_DETECTED") {
         updateRiskUI({ pathStatus: { text: "Impossible Sequence", class: "danger" } });
         triggerFreeze(`Malicious API Scraping Sequence Detected.\nSequence: ${result.reason}`);

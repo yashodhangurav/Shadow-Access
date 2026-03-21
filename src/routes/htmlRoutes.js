@@ -18,4 +18,8 @@ router.get('/dashboard', (req, res) => {
     res.render('vault', { pageCss: 'vault.css' });
 });
 
+router.get('/transfer-funds', (req, res) => {
+    res.render('transfer', { pageCss: 'vault.css' }); // Reuses vault.css for consistent UI
+});
+
 module.exports = router;

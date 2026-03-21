@@ -3,7 +3,7 @@ const { calculateAnomalyScore, calculateLinearity } = require('../utils/math');
 
 exports.enroll = async (req, res) => {
     try {
-        const { pattern } = req.body; 
+        const { pattern } = req.body;
         if (!pattern || pattern.length < 50) {
             return res.status(400).json({ error: "Need at least 50 keystrokes to build a profile." });
         }
@@ -18,12 +18,12 @@ exports.enroll = async (req, res) => {
         const stdDevDwell = Math.sqrt(varianceDwell);
 
         const updated = await User.findByIdAndUpdate(req.user._id, {
-            behaviorProfile: { 
-                avgFlightTime: meanFlight, 
-                stdDeviation: stdDevFlight, 
+            behaviorProfile: {
+                avgFlightTime: meanFlight,
+                stdDeviation: stdDevFlight,
                 avgDwellTime: meanDwell,
                 stdDevDwell: stdDevDwell,
-                sampleCount: n 
+                sampleCount: n
             }
         }, { new: true });
 
@@ -35,7 +35,7 @@ exports.enroll = async (req, res) => {
 
 exports.analyzeKeyboard = async (req, res) => {
     try {
-        const { pattern } = req.body; 
+        const { pattern } = req.body;
         const user = req.user;
 
         if (user.isFlagged) {
@@ -47,31 +47,32 @@ exports.analyzeKeyboard = async (req, res) => {
         }
 
         const profile = user.behaviorProfile;
-        
+
         const currentAvgFlight = pattern.reduce((acc, curr) => acc + curr.flightTime, 0) / pattern.length;
         const anomalyScoreFlight = calculateAnomalyScore(currentAvgFlight, profile.avgFlightTime, profile.stdDeviation);
-        
+
         const currentAvgDwell = pattern.reduce((acc, curr) => acc + (curr.dwellTime || 0), 0) / pattern.length;
         const anomalyScoreDwell = calculateAnomalyScore(currentAvgDwell, profile.avgDwellTime, profile.stdDevDwell || 0);
-        
+
         // Use Math.max so an extreme anomaly in *either* metric triggers the alarm
         let anomalyScore = Math.max(anomalyScoreFlight, anomalyScoreDwell);
-        
+
         // --- ROBOTIC PRECISION CHECK ---
         // Calculate the variance of the *current* batch of keystrokes.
         // Humans cannot type 5+ keys with exact millisecond precision.
         const currentVarFlight = pattern.reduce((acc, curr) => acc + Math.pow(curr.flightTime - currentAvgFlight, 2), 0) / pattern.length;
-        if (currentVarFlight < 2.0 && pattern.length >= 5) {
-            // Force a massive anomaly score because of mechanical precision (Bot Detection)
-            anomalyScore = Math.max(anomalyScore, 10.0);
+        if (currentVarFlight < 0.5 && pattern.length >= 8) {
+            anomalyScore = 50.0; // Robotic Precision Lockout
         }
 
-        const THRESHOLD = 3.0;
+
+        const THRESHOLD = 15.0; // Increased tolerance threshold
+
 
         if (anomalyScore > THRESHOLD) {
             console.log(`🚨 HIJACK ALERT: User ${user.username} is behaving abnormally! (Score: ${anomalyScore.toFixed(2)})`);
             await User.findByIdAndUpdate(user._id, { isFlagged: true });
-            
+
             return res.json({
                 status: "ANOMALY_DETECTED",
                 action: "FORCE_LOCKOUT",
@@ -98,11 +99,11 @@ exports.analyzeMouse = async (req, res) => {
         if (!points || points.length < 10) return res.json({ status: "OK", deviation: 5.0 });
 
         const deviation = calculateLinearity(points);
-        
+
         if (deviation < 0.5) {
             console.log(`🚨 MOUSE BOT ALERT: User ${user.username} moved rigidly! (Linearity Deviation: ${deviation.toFixed(2)})`);
             await User.findByIdAndUpdate(user._id, { isFlagged: true });
-            
+
             return res.json({
                 status: "ANOMALY_DETECTED",
                 action: "FORCE_LOCKOUT",

@@ -50,7 +50,16 @@ const checkSequence = (req, res, next) => {
         if (req.user) {
             const User = require('../models/User'); // inline require
             User.findByIdAndUpdate(req.user._id, { isFlagged: true }).exec();
+            
+            if (req.app.get('threatEmitter')) {
+                req.app.get('threatEmitter').emit('threat', { 
+                    userId: req.user._id.toString(), 
+                    action: 'FORCE_LOCKOUT', 
+                    sequence: sequence 
+                });
+            }
         }
+
         
         req.session.destroy(); // Blow up the database session
 

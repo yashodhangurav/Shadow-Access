@@ -14,8 +14,12 @@ const authRoutes = require('./src/routes/authRoutes');
 const behaviorRoutes = require('./src/routes/behaviorRoutes');
 const demoRoutes = require('./src/routes/demoRoutes');
 const htmlRoutes = require('./src/routes/htmlRoutes');
+const EventEmitter = require('events');
+const threatEmitter = new EventEmitter();
 
 const app = express();
+app.set('threatEmitter', threatEmitter);
+
 
 // 1. Connect MongoDB
 connectDB();
@@ -50,6 +54,29 @@ app.use(checkSequence);
 app.use('/api', authRoutes);
 app.use('/api', behaviorRoutes);
 app.use('/api', demoRoutes);
+
+app.get('/api/stream', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const sessionUserId = req.user ? req.user._id.toString() : null;
+
+    const listener = (data) => {
+        if (sessionUserId && data.userId === sessionUserId) {
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        }
+    };
+    
+    threatEmitter.on('threat', listener);
+    
+    const interval = setInterval(() => res.write(':keepalive\n\n'), 15000);
+    
+    req.on('close', () => {
+        threatEmitter.removeListener('threat', listener);
+        clearInterval(interval);
+    });
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`ShadowAccess Engine live on port ${PORT}`));

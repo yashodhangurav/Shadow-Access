@@ -132,18 +132,7 @@ input {
     background: var(--primary);
 }
 
-/* Freeze overlay */
-#freeze-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    text-align: center;
-}
+
 
 /* Remove heavy visuals */
 .bg-orbs,

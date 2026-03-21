@@ -1,148 +1,35 @@
-/* public/css/global.css - Core Rules, Resets, and Shared UI */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
-
-:root {
-    --bg-main: #050508;
-    --text-main: #f5f5f7;
-    --text-muted: #8892b0;
-    --accent: #00E5FF; /* Aegis Cyan */
-    --accent-hover: #00b3cc;
-    --accent-glow: rgba(0, 229, 255, 0.3);
-    --red-alert: #FF2A55;
-    --red-glow: rgba(255, 42, 85, 0.3);
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow-x: hidden;
-}
-
-/* Background Animated Orbs */
-.bg-orbs {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    z-index: -1;
-    overflow: hidden;
-}
-
-.orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.15;
-    animation: float 20s infinite alternate ease-in-out;
-}
-
-.orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; left: -100px; }
-.orb-2 { width: 500px; height: 500px; background: #6A00FF; bottom: -150px; right: -100px; animation-delay: -5s; }
-
-@keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(100px, 50px) scale(1.1); }
-}
-
-/* Typography utilities */
-h1, h2, h3 { font-weight: 800; letter-spacing: -1px; }
-.gradient-text {
-    background: linear-gradient(90deg, #00E5FF, #6A00FF);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-.mono { font-family: 'JetBrains Mono', monospace; }
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    width: 100%;
-}
-
-/* Common Panels */
-.panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    transition: border-color 0.3s ease;
-}
-
-/* Buttons */
-.btn {
-    width: 100%;
-    padding: 0.9rem;
-    border: none;
-    border-radius: 12px;
-    background: var(--accent);
-    color: #000 !important;
-    font-weight: 600;
-    font-size: 0.95rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-}
-
-.btn:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 5px 15px var(--accent-glow); }
-.btn-secondary { background: rgba(255,255,255,0.08); color: white !important; border: 1px solid var(--glass-border); }
-.btn-secondary:hover { background: rgba(255,255,255,0.15); box-shadow: none; }
-.btn-danger { background: var(--red-alert); color: white !important; }
-
-/* Status Badges */
-.status-badge {
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--glass-border);
-}
-
-.status-secure { border-color: #00ff66; color: #00ff66; }
-.status-danger { border-color: var(--red-alert); color: var(--red-alert); }
-
-/* Inputs and Forms */
-.input-group { margin-bottom: 1rem; text-align: left;}
-.input-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;}
-input[type="text"], input[type="password"], textarea {
-    width: 100%;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid var(--glass-border);
-    color: white;
-    padding: 0.9rem;
-    border-radius: 12px;
-    font-family: inherit;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-}
-input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
-
-/* Global Freeze Overlay */
+/* REQUIRED: For the Lockout Screen */
 #freeze-overlay {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(5, 5, 8, 0.97); backdrop-filter: blur(20px);
-    display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
-    z-index: 10000; opacity: 0; pointer-events: none; transition: opacity 0.4s;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    /* or use the opacity/pointer-events logic from before */
+    background: black;
+    color: red;
+    justify-content: center;
+    align-items: center;
 }
-#freeze-overlay.active { opacity: 1; pointer-events: all; }
-#freeze-overlay h1 { font-size: 4rem; color: var(--red-alert); text-shadow: 0 0 30px var(--red-glow); margin-bottom: 1rem; background: none; -webkit-text-fill-color: var(--red-alert);}
-#freeze-overlay p { color: var(--text-muted); margin-bottom: 2rem; }
+
+#freeze-overlay.active {
+    display: flex !important;
+}
+
+/* REQUIRED: For the Trust Bar logic */
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #333;
+}
+
+.progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+/* REQUIRED: To ensure the chart and inputs are visible */
+canvas,
+textarea {
+    display: block;
+    width: 100%;
+}
